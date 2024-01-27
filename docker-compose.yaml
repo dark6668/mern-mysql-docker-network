@@ -49,6 +49,7 @@ services:
  
 networks:
   hostnet:
-    external: true
-    name: network-tes1
-    
+    name: MERN-MYSQL
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET}
