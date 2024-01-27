@@ -13,7 +13,6 @@ app.get("/", (req, res) => {
 const usersRouters = require("./api/users/routers");
 app.use("/api/users", usersRouters, errHandler);
 app.listen(SERVER_PORT, async () => {
-  setTimeout(() => {
     createDatabaseConnection()
       .then(() => {
         console.log(
@@ -25,5 +24,4 @@ app.listen(SERVER_PORT, async () => {
         console.error("Server cannot start due to database connection failure");
         process.exit(1);
       });
-  }, 1000);
 });

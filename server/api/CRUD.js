@@ -7,7 +7,7 @@ class CRUD {
   async getAllData() {
     try {
       const db = await createDatabaseConnection();
-      const SELECT_QUERY = `SELECT1* FROM ${this.collectionName}`;
+      const SELECT_QUERY = `SELECT* FROM ${this.collectionName}`;
       const result = await new Promise((resolve, reject) => {
         db.query(SELECT_QUERY, (err, result) => {
           if (err) {

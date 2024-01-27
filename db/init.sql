@@ -1,6 +1,5 @@
-
-CREATE DATABASE IF NOT EXISTS test1;
-USE test1;
+CREATE DATABASE IF NOT EXISTS app;
+USE app;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL AUTO_INCREMENT,
@@ -8,7 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     password LONGTEXT NOT NULL,
     PRIMARY KEY (id)
 );
-
---- can add more table here
-
+-- Remove or modify this line
+-- can add more table here
 
