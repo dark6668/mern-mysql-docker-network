@@ -1,0 +1,6 @@
+FROM mysql:latest
+
+
+COPY init.sql /docker-entrypoint-initdb.d/data.sql
+
+###   mysql -h network ip   -u root -p

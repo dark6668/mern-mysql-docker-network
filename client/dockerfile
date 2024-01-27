@@ -1,0 +1,10 @@
+FROM node:13.12.0-alpine
+WORKDIR /react
+COPY package*.json ./
+
+RUN npm install
+COPY . .
+
+CMD [ "npm","start" ]   
+
+### docker run --rm -d --network network-tes1 -v "${PWD}:/react" react-test-network

@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  db:
+    build: ./db
+    restart: always
+    container_name: db-sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    command: ["--default-authentication-plugin=mysql_native_password", "--init-file", "/docker-entrypoint-initdb.d/init.sql"]
+    networks:
+      hostnet: 
+       ipv4_address: ${IPV4_DB}
+    env_file:
+       - .env   
+    volumes:
+    - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  server:
+   build: ./server
+   container_name:  server
+   networks:
+      hostnet: 
+       ipv4_address: ${IPV4_SERVER}
+
+   env_file:
+      - .env
+   volumes:
+     - ./server:/server 
+   environment:
+    - SERVER_PORT= ${SERVER_PORT}
+    - MYSQL_ROOT_PASSWORD = ${MYSQL_ROOT_PASSWORD}
+    - IPV4_DB =${IPV4_DB}
+    - MYSQL_DATABASE=${MYSQL_DATABASE}
+   depends_on:
+   - db   
+  client:
+   build: ./client
+   container_name: client-react
+   networks:
+      hostnet: 
+       ipv4_address: ${IPV4_REACT}
+   depends_on:
+   - db   
+   volumes:
+     - ./client:/react 
+   environment:
+      - REACT_APP_API_URL=http://${IPV4_SERVER}:${SERVER_PORT}
+ 
+networks:
+  hostnet:
+    external: true
+    name: network-tes1
+    
