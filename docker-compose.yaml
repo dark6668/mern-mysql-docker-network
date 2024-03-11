@@ -3,7 +3,6 @@ version: "3.8"
 services:
   db:
     build: ./db
-    restart: always
     container_name: db-sql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -35,6 +34,9 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - IPV4_DB=${IPV4_DB}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - REACT_APP_API_URL=http://${IPV4_REACT}:3000
+      - SECRET_ACCESS_TOKEN=${SECRET_ACCESS_TOKEN}
+      - SECRET_REFRESH_TOKEN=${SECRET_REFRESH_TOKEN}
     depends_on:
        db:
         condition: service_healthy

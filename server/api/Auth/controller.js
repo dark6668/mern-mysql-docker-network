@@ -1,8 +1,5 @@
 const { CRUD } = require("../CRUD");
-// const bcrypt = require("bcrypt");
-
-const secretAccessToken = process.env.SECRET_ACCESS_TOKEN;
-const secretRefreshToken = process.env.SECRET_REFRESH_TOKEN;
+const bcrypt = require("bcrypt");
 
 class Auth extends CRUD {
   constructor() {
@@ -16,7 +13,9 @@ class Auth extends CRUD {
         .getAllData()
         .then(async (result) => {
           let isUserExist = result.filter((item) => {
-            return item.name === name && item.password === password;
+            return (
+              item.name === name && bcrypt.compareSync(password, item.password)
+            );
           });
           if (isUserExist.length === 0) {
             return res.status(401).send({
@@ -24,7 +23,7 @@ class Auth extends CRUD {
             });
           }
           delete isUserExist[0].password;
-          super.getTokens(isUserExist[0].name).then((tokens) => {
+          super.getTokens(isUserExist[0]).then((tokens) => {
             isUserExist[0] = {
               ...isUserExist[0],
               accessToken: tokens.accessToken,
@@ -40,11 +39,13 @@ class Auth extends CRUD {
       errHandler(err);
     }
   }
+
   async SignUP(req, res, errHandler) {
     try {
       const { name, password } = req.body.UserData;
+      const hashPassword = bcrypt.hashSync(password, 10);
       const column = ["name", "password", "permissions"];
-      const values = [`'${name}', '${password}', JSON_ARRAY()`];
+      const values = [`'${name}', '${hashPassword}', JSON_ARRAY()`];
       super
         .insertToTables(column, values)
         .then(() => {
@@ -76,6 +77,23 @@ class Auth extends CRUD {
         });
     } catch (error) {
       errHandler(err);
+    }
+  }
+
+  validateTokenBeforeLogin(req, res, errHandler) {
+    try {
+      const userdata = req.body.userdata;
+      super
+        .getItemByKey("id", userdata.id)
+        .then((user) => {
+          user = user.map(({ password, ...rest }) => rest);
+          res.status(200).send({ user });
+        })
+        .catch((err) => {
+          errHandler(err);
+        });
+    } catch (error) {
+      errHandler(error);
     }
   }
 }

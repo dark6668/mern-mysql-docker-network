@@ -25,16 +25,18 @@ export default function LoginPage(props) {
           props.getUserInfo(userInfo[0]);
           return;
         }
-        // setInLoginPage(prev=>!prev)
+        setInLoginPage((prev) => !prev);
       })
       .catch((errorData) => {
         setNotFoundPermissionsMessage(errorData.err);
       });
   }
+
   function changePage() {
     setNotFoundPermissionsMessage("");
     setInLoginPage((prev) => !prev);
   }
+
   return (
     <div>
       {inLoginPage ? (

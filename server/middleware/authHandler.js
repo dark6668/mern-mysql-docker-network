@@ -10,9 +10,11 @@ async function authHandler(req, res, next) {
   jwt.verify(accessToken, secretAccessToken, (err, user) => {
     if (err) {
       console.log(err);
+
       res.status(401).send({ error: "Unauthorized" });
       return;
     }
+    req.body.userdata = user;
     next();
   });
 }

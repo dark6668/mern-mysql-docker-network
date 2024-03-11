@@ -29,6 +29,7 @@ export default class Utility {
             if (err.message === "Failed to fetch") {
               alert("Something went wrong.");
             }
+            console.log(err.message);
             reject({ error: err });
           });
       } catch (error) {

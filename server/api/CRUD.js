@@ -30,14 +30,10 @@ class CRUD {
 
   async insertToTables(column, VALUES) {
     try {
-      console.log(column);
-      console.log(VALUES);
       const db = await createDatabaseConnection();
-
       const INSERT_QUERY = `INSERT INTO ${this.collectionName} (${column.join(
         ", ",
       )}) VALUES (${VALUES.join(", ")})`;
-      console.log(INSERT_QUERY);
       return new Promise((resolve, reject) => {
         db.query(INSERT_QUERY, (err, result) => {
           if (err) {
@@ -54,13 +50,13 @@ class CRUD {
     }
   }
 
-  async getItemByID(column, id) {
+  async getItemByKey(key, value) {
     try {
       const db = await createDatabaseConnection();
 
-      const SELECT_QUERY = `SELECT ${column}
-		FROM  ${this.collectionName}
-		WHERE id=${id};`;
+      const SELECT_QUERY = `SELECT *
+      FROM ${this.collectionName}
+      WHERE ${key}='${value}';`;
 
       return new Promise((resolve, reject) => {
         db.query(SELECT_QUERY, (err, result) => {
@@ -77,24 +73,30 @@ class CRUD {
     }
   }
 
-  async updateItem(id, key, value) {
+  async updateItem(values) {
     try {
       const db = await createDatabaseConnection();
 
-      const UPDATE_QUERY = `UPDATE ${this.collectionName}
-		SET ${key} = '${value}'
-		WHERE id =${id}`;
+      const UPDATE_QUERY = `UPDATE ${this.collectionName} SET ${Object.entries(
+        values,
+      )
+        .map(
+          ([key, value]) =>
+            `${key} = ${typeof value === "string" ? `'${value}'` : `'${JSON.stringify(value)}'`}`,
+        )
+        .join(", ")} WHERE id = ?`;
 
-      return new Promise((resolve, reject) => {
-        db.query(UPDATE_QUERY, (err, result) => {
+      await new Promise((resolve, reject) => {
+        db.query(UPDATE_QUERY, [values.id], (err, result) => {
           if (err) {
             reject(err);
+          } else {
+            resolve(true);
           }
-          resolve(true);
         });
-      }).then((result) => {
-        return result;
       });
+
+      return true;
     } catch (err) {
       throw new Error(err);
     }
@@ -136,14 +138,36 @@ class CRUD {
       }
     });
   }
+
+  async deleteItemByKey(key, value) {
+    try {
+      const db = await createDatabaseConnection();
+
+      const DELETE_QUERY = ` DELETE FROM ${this.collectionName}   WHERE ${key}='${value}';`;
+      return new Promise((resolve, reject) => {
+        db.query(DELETE_QUERY, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(true);
+        });
+      }).then((result) => {
+        return result;
+      });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 }
 
 function generateAccessToken(user) {
-  return jwt.sign({ user }, secretAccessToken, { expiresIn: "10m" });
+  return jwt.sign({ id: user.id, name: user.name }, secretAccessToken, {
+    expiresIn: "10m",
+  });
 }
 
 function generateRefreshToken(user) {
-  return jwt.sign({ user }, secretRefreshToken);
+  return jwt.sign({ id: user.id, name: user.name }, secretRefreshToken);
   // return jwt.sign({email},secretrefReshToken,{expiresIn: '15s'})
 }
 
