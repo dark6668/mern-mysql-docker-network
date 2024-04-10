@@ -1,6 +1,6 @@
 async function errHandler(error, req, res, next) {
   console.log(error);
-  res.status(500).send({ err: "something went wrong" });
+  res.status(error.status).send({ message: error.message });
 }
 
 module.exports = errHandler;

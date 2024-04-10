@@ -4,6 +4,8 @@ const usersCrudControler = new Users("users");
 const router = express.Router();
 
 router.get("/getUsers", usersCrudControler.getUsers.bind(usersCrudControler));
+router.get("/getUser", usersCrudControler.getUser.bind(usersCrudControler));
+
 router.delete(
   "/deleteUser/:userId",
   usersCrudControler.deleteUser.bind(usersCrudControler),

@@ -8,10 +8,11 @@ const cors = require("cors");
 app.use(express.json());
 app.use(cors({ origin: process.env.REACT_APP_API_URL, credentials: true }));
 
-const usersRouters = require("./api/users/routers");
+const usersRouters = require("./api/Users/routers");
 const AuthRouters = require("./api/Auth/routers");
-
+const GroupsRouters = require("./api/Groups/routers");
 app.use("/api/users", authHandler, usersRouters, errHandler);
+app.use("/api/groups", authHandler, GroupsRouters, errHandler);
 
 app.use("/api/auth", AuthRouters, errHandler);
 

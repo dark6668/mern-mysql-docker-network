@@ -3,8 +3,8 @@ import PopUpModal from "./PopUpModle";
 import { Button, TextField } from "@mui/material";
 import MultiSelect from "./MultiSelect";
 
-export default function NewPopUp({
-  errMessage,
+export default function PopUp({
+  errorMessages,
   selectedUser,
   ispopUpOpen,
   changePopUpValue,
@@ -14,7 +14,7 @@ export default function NewPopUp({
   checkboxOptions,
 }) {
   useEffect(() => {
-    if (selectedUser !== undefined) {
+    if (selectedUser !== undefined && Object.keys(selectedUser).length !== 0) {
       setFields((prevFields) => ({
         ...prevFields,
         id: selectedUser.id,
@@ -79,11 +79,22 @@ export default function NewPopUp({
       return (
         <div key={key}>
           <TextField
+            error={
+              errorMessages.length > 0
+                ? errorMessages.some((item) => Object.keys(item).includes(key))
+                : false
+            }
             key={key}
             onChange={(event) => getInput(event.target.value, key)}
             fullWidth
             label={key}
             id={key}
+            helperText={
+              errorMessages.length > 0 &&
+              errorMessages
+                .filter((item) => Object.keys(item).includes(key))
+                .map((item) => item[key])
+            }
             defaultValue={selectedUser[key]}
           />
         </div>
@@ -97,12 +108,20 @@ export default function NewPopUp({
 
   return (
     selectedUser !== undefined && (
-      <PopUpModal handleOpen={ispopUpOpen} handleClose={changePopUpValue}>
+      <PopUpModal
+        handleOpen={ispopUpOpen}
+        handleClose={(event) => changePopUpValue(event, {})}
+      >
         <div className="flex-col">
           {Object.keys(fields).map((key) => (
             <div key={key}>{renderTextField(key, fields[key])}</div>
           ))}
-          <div className="text-red-500 font-bold">{errMessage}</div>
+          {errorMessages.length !== 0 &&
+            errorMessages[0].general !== undefined && (
+              <div>
+                <div className="error-message">{errorMessages[0].general}</div>
+              </div>
+            )}
           <Button onClick={getData} variant="outlined">
             {buttonText ? buttonText : "submit"}
           </Button>

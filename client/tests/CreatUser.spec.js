@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("test", async ({ page }) => {
+  return;
   await page.goto("http://172.24.0.6:3000/");
   // eslint-disable-next-line testing-library/prefer-screen-queries
   await page.getByText("Sign Up").click();

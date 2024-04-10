@@ -1,36 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Form from "./Form";
-import ValidLogin from "./ValidLogin";
-export default function Login(props) {
+import Utility from "../function/utility";
+export default function Login({
+  handleAuthentication,
+  errorMessage,
+  changePage,
+}) {
   const [errorMessages, setErrorMessages] = useState([]);
-  const inputField = [
-    {
-      name: "name",
-      label: "name",
-      placeholder: "name",
-      type: "name",
-    },
-    {
-      name: "password",
-      label: "Password",
-      placeholder: "••••••••",
-      type: "password",
-    },
-  ];
+  const inputField = [{ name: "name" }, { name: "password" }];
+  useEffect(() => {
+    if (errorMessage?.length > 0) {
+      setErrorMessages([{ general: errorMessage }]);
+    }
+  }, [errorMessage]);
+
   function handleLogin(inputValue) {
     setErrorMessages([]);
-    ValidLogin(inputValue)
+    Utility.validInput(inputValue)
       .then(() => {
-        props.handleAuthentication({ inputValue, action: "login" });
+        handleAuthentication({ inputValue, action: "login" });
       })
-      .catch((error) => {
-        setErrorMessages(error);
+      .catch((errors) => {
+        setErrorMessages(errors);
       });
   }
-  function handlePageChange(params) {
+
+  function handlePageChange() {
     setErrorMessages([]);
-    props.changePage();
+    changePage();
   }
+
   return (
     <div>
       <Form
@@ -38,7 +37,7 @@ export default function Login(props) {
         submit={handleLogin}
         buttonText={"Login"}
         errorMessages={errorMessages}
-        notFoundPermissionsMessage={props.notFoundPermissionsMessage}
+        errMessage={errorMessage}
         toggleText={"Sign Up"}
         toggleTextFunction={handlePageChange}
       />

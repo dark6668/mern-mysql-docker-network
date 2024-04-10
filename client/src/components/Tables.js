@@ -20,12 +20,25 @@ export default function NewTable({
   editFunction,
   user,
 }) {
-  const [selectUsers, setSelectUsers] = useState([]);
   const [excelRows, setExcelRows] = useState([]);
+  const [tableRows, setTableRows] = useState([]);
+  useEffect(() => {
+    if (rows.length > 0) {
+      setTableRows([
+        ...rows.map((item) => ({
+          ...item,
+          permissions:
+            item.permissions.length === 0
+              ? "No permissions "
+              : item.permissions.join(","),
+        })),
+      ]);
+    }
+  }, [rows]);
 
   function handleCheckboxClick(event, item) {
     if (!event.target.checked) {
-      setExcelRows((prev) => prev.filter((row) => row !== item));
+      setExcelRows((prev) => prev.filter((row) => row.id !== item.id));
       return;
     }
     setExcelRows((prev) => [...prev, item]);
@@ -36,21 +49,22 @@ export default function NewTable({
       setExcelRows([]);
       return;
     }
-    setExcelRows(rows);
+    setExcelRows(tableRows);
   }
 
   const renderCellContent = (row, column) => {
     const cellContent = row[column];
-    if (column === "permissions") {
-      if (cellContent.length === 0) {
-        return "No Value here";
-      }
-      return cellContent.join(", ");
-    } else if (column === "edit") {
+    if (column === "edit") {
       return (
         <IconButton
-          onClick={() => {
-            editFunction(row);
+          onClick={(event) => {
+            const rowformat = {
+              ...row,
+              permissions:
+                row.permissions === "No permissions " ? [] : row.permissions,
+              password: "",
+            };
+            editFunction(event, rowformat);
           }}
           disabled={!user.permissions.includes("edit_users")}
           aria-label="edit"
@@ -88,7 +102,7 @@ export default function NewTable({
                 onChange={(event) => handleCheckboxClick(event, row)}
               />
             }
-            label={rows.indexOf(row) + 1}
+            label={rows.findIndex((item) => item.id === row.id) + 1}
           />
         </div>
       );
@@ -98,7 +112,7 @@ export default function NewTable({
       }
       return cellContent !== undefined && cellContent !== ""
         ? cellContent
-        : "No Value here";
+        : "No value here";
     }
   };
 
@@ -120,7 +134,7 @@ export default function NewTable({
                   >
                     {col === "export" ? (
                       <ExportToExcel
-                        rows={excelRows.length > 0 ? excelRows : rows}
+                        rows={excelRows.length > 0 ? excelRows : tableRows}
                       />
                     ) : col === "id" ? (
                       <FormControlLabel
@@ -136,7 +150,7 @@ export default function NewTable({
             </TableHead>
           )}
           <TableBody>
-            {rows.map((row, rowIndex) => (
+            {tableRows.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {column &&
                   column.map((col, colIndex) => (

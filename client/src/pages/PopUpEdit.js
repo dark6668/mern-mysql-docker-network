@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Utility from "../function/utility";
 import PopUp from "../components/PopUp";
-import { keys } from "@mui/system";
 export default function PopUpEdit({
   ispopUpOpen,
   changePopUpValue,
@@ -9,18 +8,21 @@ export default function PopUpEdit({
   getUsers,
 }) {
   useEffect(() => {
-    if (selectedUser !== undefined) {
-      setChips([selectedUser.permissions]);
+    if (
+      selectedUser?.permissions !== undefined &&
+      selectedUser.permissions.length > 0
+    ) {
+      setChips(selectedUser.permissions.split(","));
     }
   }, [selectedUser]);
 
   useEffect(() => {
     if (!ispopUpOpen) {
-      setErrMessage("");
+      setErrorMessages("");
     }
   }, [ispopUpOpen]);
 
-  const [errMessage, setErrMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState([]);
   const [chips, setChips] = useState([]);
   const [checkboxOptions, setCheckboxOptions] = useState([
     "edit_users",
@@ -28,26 +30,47 @@ export default function PopUpEdit({
     "view_users",
     "add_users",
   ]);
+
   function areUsersEqual(user1, user2) {
-    for (const key in user2) {
-      if (Array.isArray(user2[key])) {
-        const userArray1 = user1[key].slice().sort().toString();
-        const userArray2 = user2[key].slice().sort().toString();
-        if (userArray1 !== userArray2) return false;
-      } else {
-        if (user1[key] !== user2[key]) return false;
+    user2.permissions =
+      user2.permissions === "No value here" ? "" : user2.permissions.toString();
+    user1.permissions =
+      user1.permissions === "No value here" ? "" : user1.permissions.toString();
+    const changedValues = {};
+    for (let key in user1) {
+      if (key !== "id" && user1[key] !== user2[key]) {
+        changedValues[key] = user1[key];
       }
     }
-    return true;
+    return changedValues;
   }
 
   async function modifyUserData(updateUser) {
-    setErrMessage("");
-    const allEqual = areUsersEqual(updateUser, selectedUser);
-    if (allEqual && updateUser.password === "") {
-      setErrMessage("Please change at least one field.");
+    setErrorMessages([]);
+    const changedInput = areUsersEqual(updateUser, selectedUser);
+
+    if (Object.keys(changedInput).length === 0) {
+      setErrorMessages([{ general: "Please change at least one field." }]);
       return;
     }
+
+    const result = {};
+    for (let key in changedInput) {
+      if (key !== "permissions") {
+        result[key] = changedInput[key];
+      }
+    }
+
+    if (Object.keys(result).length > 0) {
+      try {
+        await Utility.validInput(result);
+      } catch (errors) {
+        setErrorMessages(errors);
+        return;
+      }
+    }
+
+    return;
     let request = {
       method: "PUT",
       url: `api/users/editUser`,
@@ -63,10 +86,20 @@ export default function PopUpEdit({
         request.Authorization = `Bearer ${sessionStorage.getItem("accessToken")}`;
       }
       await Utility.FetchRequest(request);
-      getUsers();
       changePopUpValue();
-    } catch (err) {
-      Utility.UserUnauthorized();
+      getUsers();
+    } catch (error) {
+      if (
+        error === "Failed to decode access token" ||
+        error === "Unauthorized"
+      ) {
+        Utility.UserUnauthorized();
+        return;
+      }
+
+      setErrorMessages([
+        { general: "Something went wrong. Please try again later." },
+      ]);
     }
   }
 
@@ -79,7 +112,7 @@ export default function PopUpEdit({
       changePopUpValue={changePopUpValue}
       buttonFunction={modifyUserData}
       buttonText="Update"
-      errMessage={errMessage}
+      errorMessages={errorMessages}
     />
   );
 }

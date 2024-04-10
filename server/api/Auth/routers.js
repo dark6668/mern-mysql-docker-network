@@ -6,7 +6,7 @@ const authHandler = require("../../middleware/authHandler");
 router.post("/login", AuthControler.Login.bind(AuthControler));
 router.post("/signup", AuthControler.SignUP.bind(AuthControler));
 router.post(
-  "/validate-token-before-login",
+  "/validate-token",
   authHandler,
   AuthControler.validateTokenBeforeLogin.bind(AuthControler),
 );

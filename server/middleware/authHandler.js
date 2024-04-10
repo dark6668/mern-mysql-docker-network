@@ -5,13 +5,11 @@ const secretAccessToken = process.env.SECRET_ACCESS_TOKEN;
 async function authHandler(req, res, next) {
   const authorizationHeader = req.headers.authorization;
   if (!authorizationHeader)
-    return res.status(401).send({ error: "Unauthorized" });
+    return res.status(401).send({ message: "Unauthorized" });
   const accessToken = authorizationHeader.split(" ")[1];
   jwt.verify(accessToken, secretAccessToken, (err, user) => {
     if (err) {
-      console.log(err);
-
-      res.status(401).send({ error: "Unauthorized" });
+      res.status(401).send({ message: "Unauthorized" });
       return;
     }
     req.body.userdata = user;

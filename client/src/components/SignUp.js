@@ -1,32 +1,17 @@
 import React, { useState } from "react";
 import Form from "./Form";
-import ValidLogin from "./ValidLogin";
-export default function SignUp(props) {
+import Utility from "../function/utility";
+export default function SignUp({ handleAuthentication, changePage }) {
   const [errorMessages, setErrorMessages] = useState([]);
-
-  const inputField = [
-    {
-      name: "name",
-      label: "name",
-      placeholder: "name",
-      type: "name",
-    },
-    {
-      name: "password",
-      label: "Password",
-      placeholder: "••••••••",
-      type: "password",
-    },
-  ];
-
+  const inputField = [{ name: "name" }, { name: "password" }];
   function handleLogin(inputValue) {
     setErrorMessages([]);
-    ValidLogin(inputValue)
+    Utility.validInput(inputValue)
       .then(() => {
-        props.handleAuthentication({ inputValue, action: "signup" });
+        handleAuthentication({ inputValue, action: "signup" });
       })
-      .catch((error) => {
-        setErrorMessages(error);
+      .catch((errors) => {
+        setErrorMessages(errors);
       });
   }
 
@@ -38,7 +23,7 @@ export default function SignUp(props) {
         buttonText={"Sign Up"}
         errorMessages={errorMessages}
         toggleText={"Login"}
-        toggleTextFunction={props.changePage}
+        toggleTextFunction={changePage}
       />
     </div>
   );

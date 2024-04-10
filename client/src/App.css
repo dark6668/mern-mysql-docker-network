@@ -64,10 +64,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
   background-color: #333;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+}
+.avatar-contianer {
+  padding: 10px 20px;
 }
 .button-popUp-add {
   display: flex;
@@ -80,15 +82,49 @@
   cursor: pointer;
 }
 
-.menu {
-  position: absolute;
+.flex-center {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+
+  justify-content: center;
+}
+.form {
   display: flex;
   flex-direction: column;
-  z-index: 2;
-  min-width: 200px;
-  background-color: rgb(255, 255, 255);
-  border-radius: 4px;
-  filter: drop-shadow(rgba(0, 0, 0, 0.32) 0px 2px 8px);
-  margin-top: 5px;
+  align-items: center;
+  gap: 20px;
+  max-width: 380px;
+  padding: 50px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.error-message {
+  word-wrap: break-word;
+  color: red;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .form {
+    padding: 30px;
+  }
+}
+
+.left-menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-select-none{
+  user-select: none;
+}
+
+.clickable-row:hover {
   cursor: pointer;
 }

@@ -18,10 +18,13 @@ class Auth extends CRUD {
             );
           });
           if (isUserExist.length === 0) {
-            return res.status(401).send({
-              err: "Sorry, the user could not be found. Please check the username or consider creating a new account if you haven't already.",
+            return errHandler({
+              message:
+                "Incorrect username or password. Please double-check your credentials and try again.",
+              status: 401,
             });
           }
+
           delete isUserExist[0].password;
           super.getTokens(isUserExist[0]).then((tokens) => {
             isUserExist[0] = {
@@ -73,7 +76,7 @@ class Auth extends CRUD {
           res.status(200).send({ accessToken });
         })
         .catch((err) => {
-          errHandler(err);
+          errHandler({ message: err, status: 401 });
         });
     } catch (error) {
       errHandler(err);

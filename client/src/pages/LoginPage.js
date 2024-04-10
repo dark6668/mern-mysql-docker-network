@@ -1,13 +1,43 @@
 import React, { useEffect, useState } from "react";
-import Form from "../components/Form";
-import ValidLogin from "../components/ValidLogin";
 import Utility from "../function/utility";
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";
 export default function LoginPage(props) {
-  const [notFoundPermissionsMessage, setNotFoundPermissionsMessage] =
-    useState("");
+  useEffect(() => {
+    checkToken();
+  },);
+
+  const [errorMessage, setErrorMessage] = useState("");
   const [inLoginPage, setInLoginPage] = useState(true);
+  const checkToken = async () => {
+    try {
+      if (sessionStorage.getItem("accessToken")) {
+        let request = {
+          method: "POST",
+          url: "api/auth/validate-token",
+          ContentType: "application/json; charset=UTF-8",
+          Authorization: `Bearer ${sessionStorage.getItem("accessToken")}`,
+        };
+        const tokenIsExpires = await Utility.CheckAccessTokenExpiresIn();
+        if (tokenIsExpires === "Access token has expired") {
+            await Utility.getNewAccessToken();
+            request.Authorization = `Bearer ${sessionStorage.getItem("accessToken")}`;
+        }
+        Utility.FetchRequest(request)
+          .then((data) => {
+            props.getUserInfo(data.user[0]);
+          })
+          .catch(() => {
+           Utility.UserUnauthorized()
+            return
+          });
+      }
+    } catch (error) {
+      if (error !=="Failed to decode access token") {        
+        setErrorMessage(error.message);
+      }
+    }
+  };
 
   async function handleAuthentication(UserData) {
     const request = {
@@ -27,13 +57,13 @@ export default function LoginPage(props) {
         }
         setInLoginPage((prev) => !prev);
       })
-      .catch((errorData) => {
-        setNotFoundPermissionsMessage(errorData.err);
+      .catch((error) => {
+        setErrorMessage(error);
       });
   }
 
   function changePage() {
-    setNotFoundPermissionsMessage("");
+    setErrorMessage("");
     setInLoginPage((prev) => !prev);
   }
 
@@ -42,7 +72,7 @@ export default function LoginPage(props) {
       {inLoginPage ? (
         <Login
           handleAuthentication={handleAuthentication}
-          notFoundPermissionsMessage={notFoundPermissionsMessage}
+          errorMessage={errorMessage}
           changePage={changePage}
         />
       ) : (

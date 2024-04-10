@@ -50,11 +50,11 @@ class CRUD {
     }
   }
 
-  async getItemByKey(key, value) {
+  async getItemByKey(key, value, column) {
     try {
       const db = await createDatabaseConnection();
-
-      const SELECT_QUERY = `SELECT *
+      column = column === undefined ? "*" : column;
+      const SELECT_QUERY = `SELECT ${column}
       FROM ${this.collectionName}
       WHERE ${key}='${value}';`;
 
@@ -73,19 +73,36 @@ class CRUD {
     }
   }
 
-  async updateItem(values) {
+  async customQuery(SELECT_QUERY) {
+    const db = await createDatabaseConnection();
     try {
       const db = await createDatabaseConnection();
+      return new Promise((resolve, reject) => {
+        db.query(SELECT_QUERY, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        });
+      }).then((result) => {
+        return result;
+      });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
+  async updateItem(id, values) {
+    try {
+      const db = await createDatabaseConnection();
       const UPDATE_QUERY = `UPDATE ${this.collectionName} SET ${Object.entries(
         values,
       )
         .map(
           ([key, value]) =>
-            `${key} = ${typeof value === "string" ? `'${value}'` : `'${JSON.stringify(value)}'`}`,
+            `${key} = ${typeof value === "string" ? `'${value}'` : value}`,
         )
-        .join(", ")} WHERE id = ?`;
-
+        .join(", ")} WHERE id = ${id}`;
       await new Promise((resolve, reject) => {
         db.query(UPDATE_QUERY, [values.id], (err, result) => {
           if (err) {
@@ -120,17 +137,17 @@ class CRUD {
     return new Promise((resolve, reject) => {
       try {
         if (!listOfRefreshToken.includes(refreshToken)) {
-          reject("Token doesn't exist");
+          reject("Unauthorized");
           return;
         }
         jwt.verify(refreshToken, secretRefreshToken, (err, result) => {
           if (err) {
             const indexToRemove = listOfRefreshToken.indexOf(refreshToken);
             listOfRefreshToken.splice(indexToRemove, 1);
-            reject("Token doesn't exist");
+            reject("Unauthorized");
             return;
           }
-          const accessToken = generateAccessToken(result.user);
+          const accessToken = generateAccessToken(result);
           resolve(accessToken);
         });
       } catch (error) {
@@ -167,8 +184,9 @@ function generateAccessToken(user) {
 }
 
 function generateRefreshToken(user) {
-  return jwt.sign({ id: user.id, name: user.name }, secretRefreshToken);
-  // return jwt.sign({email},secretrefReshToken,{expiresIn: '15s'})
+  return jwt.sign({ id: user.id, name: user.name }, secretRefreshToken, {
+    expiresIn: "30m",
+  });
 }
 
 module.exports = {

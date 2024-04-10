@@ -9,13 +9,10 @@ export default function ExportToExcel({ rows }) {
     const rowsWithFlattenedPermissions = rows.map((row, index) => ({
       ...row,
       id: index + 1,
-      permissions:
-        row.permissions.length === 0 ? 0 : row.permissions.join(", "),
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(rowsWithFlattenedPermissions);
-
     const columns = Object.keys(rowsWithFlattenedPermissions[0]);
+
     const columnWidths = columns.map((column) => {
       const keyWidth = column.length;
       const contentWidth = Math.max(

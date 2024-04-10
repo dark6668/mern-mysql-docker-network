@@ -8,7 +8,6 @@ export default function UserTable({ getUsers, users, user }) {
   const [selectedUser, setSelectedUser] = useState({});
   const [ispopUpOpen, setIspopUpOpen] = useState(false);
   const [tableColumn, setTableColumn] = useState([]);
-
   useEffect(() => {
     if (users.length > 0) {
       const filteredKeys = Object.keys(users[0]).filter((key) => {
@@ -19,7 +18,7 @@ export default function UserTable({ getUsers, users, user }) {
     }
   }, [users]);
 
-  function changePopUpValue(user) {
+  function changePopUpValue(event, user) {
     setSelectedUser(user);
     setIspopUpOpen((prev) => !prev);
   }
